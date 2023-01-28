@@ -1,2 +1,2 @@
-# BalzingText_SentimentAnalysis
-We will predict the helpfulness of Amazon reviews using BlazingText. 
+# BlazingText_SentimentAnalysis
+This project demonstrates the training of a supervised text classifier meant to categorize reviews for games and toy products purchased from an online store into two classes: 'positve'(__labe__1) and 'negative'(__label__2), using AWS SageMaker 's BlazingText. The BlazingText algorithm implements highly optimized implementations of Word2vec and text classification algorithms, and is therfore suited for sentiment analysis. 
