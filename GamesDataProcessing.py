@@ -47,10 +47,8 @@ split_sentence_data = split_sentences(labeled_data)
 
 import boto3
 from botocore.exceptions import ClientError
-# Note: This section implies that the bucket below has already been made and that you have access
-# to that bucket. You would need to change the bucket below to a bucket that you have write
-# premissions to. This will take time depending on your internet connection, the training file is ~ 40 mb
 
+#Bucket path containing data
 BUCKET = "ml-workflow-training-job"
 s3_prefix = "ToysAndGames"
 
@@ -84,11 +82,11 @@ def upload_file_to_s3(file_name, s3_prefix):
 split_data_trainlen = int(len(split_sentence_data) * .9)
 split_data_validationlen = int(len(split_sentence_data) * .1)
 
-# Todo: write the training file
+#writing to the training file
 train_path = write_trainfile(split_sentence_data[:split_data_trainlen])
 print("Training file written!")
 
-# Todo: write the validation file
+# Writing to the validation file
 validation_path = write_validationfile(split_sentence_data[split_data_trainlen:])
 print("Validation file written!")
 
