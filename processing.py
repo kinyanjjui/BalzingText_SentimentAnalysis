@@ -4,8 +4,13 @@ import sagemaker
 import json
 import zipfile
 
-import pandas as pd
-import numpy as np
+#Bucket path containing data
+BUCKET = "ml-workflow-training-job"
+s3_prefix = "ToysAndGames"
+file_name = "Toys_and_Games_5.json.zip"
+
+source_path = 's3://' + "/".join([s3_bucket, s3_prefix, file_name])
+
 
 def label_data(input_data):
     labeled_data = []
@@ -39,35 +44,18 @@ def split_sentences(labeled_data):
     return split_sentences
 
 
-input_data  = unzip_data('Toys_and_Games_5.json.zip')
-labeled_data = label_data('Toys_and_Games_5.json')
-split_sentence_data = split_sentences(labeled_data)
-
-#print(split_sentence_data[0:9])
-
-import boto3
-from botocore.exceptions import ClientError
-
-#Bucket path containing data
-BUCKET = "ml-workflow-training-job"
-s3_prefix = "ToysAndGames"
-
-
-def cycle_data(fp, data):
+def write_data(data, train_path, test_path, proportion):
+    border_index = int(proportion * len(data))
+    train_f = open(train_path, 'w')
+    test_f = open(test_path, 'w')
+    index = 0
     for d in data:
-        fp.write(d + "\n")
+        if index < border_index:
+            train_f.write(d + '\n')
+        else:
+            test_f.write(d + '\n')
+        index += 1
 
-def write_trainfile(split_sentence_data):
-    train_path = "hello_blaze_train"
-    with open(train_path, 'w') as f:
-        cycle_data(f, split_sentence_data)
-    return train_path
-
-def write_validationfile(split_sentence_data):
-    validation_path = "hello_blaze_validation"
-    with open(validation_path, 'w') as f:
-        cycle_data(f, split_sentence_data)
-    return validation_path 
 
 def upload_file_to_s3(file_name, s3_prefix):
     object_name = os.path.join(s3_prefix, file_name)
@@ -78,21 +66,12 @@ def upload_file_to_s3(file_name, s3_prefix):
         logging.error(e)
         return False
     
-# Split the data
-split_data_trainlen = int(len(split_sentence_data) * .9)
-split_data_validationlen = int(len(split_sentence_data) * .1)
+    
+if __name__ == "__main__":
+    unzipped_path = unzip_data('/opt/ml/processing/input/Toys_and_Games_5.json.zip')
+    labeled_data = label_data(unzipped_path)
+    new_split_sentence_data = split_sentences(labeled_data)
+    write_data(new_split_sentence_data, '/opt/ml/processing/output/train/hello_blaze_train_scikit', '/opt/ml/processing/output/test/hello_blaze_test_scikit', .9)
+    upload_file_to_s3(file_name)
+    print(source_path)
 
-#writing to the training file
-train_path = write_trainfile(split_sentence_data[:split_data_trainlen])
-print("Training file written!")
-
-# Writing to the validation file
-validation_path = write_validationfile(split_sentence_data[split_data_trainlen:])
-print("Validation file written!")
-
-upload_file_to_s3(train_path, s3_prefix)
-print("Train file uploaded!")
-upload_file_to_s3(validation_path, s3_prefix)
-print("Validation file uploaded!")
-
-print(" ".join([train_path, validation_path]))
