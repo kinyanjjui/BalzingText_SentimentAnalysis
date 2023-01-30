@@ -14,8 +14,8 @@ sklearn_processor = SKLearnProcessor(framework_version='0.20.0',
                                      role=role)
 
 
-if name == __main__:
-sklearn_processor.run(code='processing.py', # preprocessing code
+if __name__ == "__main__":
+sklearn_processor.run(code='preprocessing.py', # preprocessing code
                       inputs=[ProcessingInput(
                           source = 's3://ml-workflow-training-job/ToysandGames/Toys_and_Games_5.json.zip', # the S3 path of the unprocessed data
                           destination='/opt/ml/processing/input', # a 'local' directory path for the input to be downloaded into
